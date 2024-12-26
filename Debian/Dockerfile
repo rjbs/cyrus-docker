@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # If you change the default source image, update the README, which references
 # the underlying Debian version.
 ARG DEBIAN_VERSION=bookworm
