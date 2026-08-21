@@ -163,6 +163,7 @@ apt-get -y install --no-install-recommends \
     libnet-ldap-perl \
     libnet-ldap-server-perl \
     libnet-ldap-server-test-perl \
+    libprotocol-http2-perl \
     libterm-readline-gnu-perl \
     libtype-tiny-perl \
     `# BEGIN JMAP-TestSuite prereqs` \
