@@ -186,6 +186,7 @@ sub configure ($self, $opt) {
   my $with_sanitizer = $opt->sanitizer ? " with " . $opt->sanitizer : "";
 
   my $san_flags = q{};
+  my $san_c_flags = q{};
   my $san_ldflags = q{};
 
   if ($opt->sanitizer) {
@@ -238,6 +239,12 @@ sub configure ($self, $opt) {
         # clang offers no such luxury, and hence libcyrus.so and libcyrus_min.so
         # have unresolved references to __ubsan_handle_type_mismatch_v1
         $san_ldflags .= ' -lubsan';
+        # With optimisation enabled, clang's ubsan adds runtime checks for
+        # "Indirect call of a function through a function pointer of the wrong type."
+        # Unfortunately Cyrus does this rather a lot, so for now we skip that
+        # test, as cleaning this up completely involves some pointers passed to
+        # documented public APIs.
+        $san_c_flags .= ' -fno-sanitize=function';
       }
     } elsif ($opt->sanitizer eq 'cover') {
       # lcov was fine without this, but gcovr needs it
@@ -280,7 +287,7 @@ sub configure ($self, $opt) {
 
   local $ENV{LDFLAGS} = "$san_ldflags -L$libsdir/lib/x86_64-linux-gnu -L$libsdir/lib -Wl,-rpath,$libsdir/lib/x86_64-linux-gnu -Wl,-rpath,$libsdir/lib";
   local $ENV{PKG_CONFIG_PATH} = "$libsdir/lib/x86_64-linux-gnu/pkgconfig:$libsdir/lib/pkgconfig:\$PKG_CONFIG_PATH";
-  local $ENV{CFLAGS} = "$san_flags -g -fPIC -W -Wall -Wextra -Werror -Wwrite-strings -Wformat=2 $more_cflags";
+  local $ENV{CFLAGS} = "$san_flags$san_c_flags -g -fPIC -W -Wall -Wextra -Werror -Wwrite-strings -Wformat=2 $more_cflags";
   local $ENV{CXXFLAGS} = "$san_flags -g -fPIC -W -Wall -Wextra -Werror $more_cxxflags";
   local $ENV{PATH} = "$libsdir/bin:$ENV{PATH}";
 
