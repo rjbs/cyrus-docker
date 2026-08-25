@@ -252,10 +252,16 @@ sub configure ($self, $opt) {
 
   my $with_cc = "";
 
-  if ($opt->compiler) {
-    $ENV{CC} = $opt->compiler;
-
-    $with_cc = " using $ENV{CC}";
+  if (my $compiler = $opt->compiler) {
+    $ENV{CC} = $compiler;
+    if ($compiler eq 'gcc') {
+        $ENV{CXX} = 'g++';
+    } elsif ($compiler eq 'clang') {
+        $ENV{CXX} = 'clang++';
+    } else {
+        warn colored(['red'], "Unknown C compiler '$compiler' so leaving \$ENV{CXX} unset") . "\n";
+    }
+    $with_cc = " using $compiler";
   }
 
   say "building cyrusversion $version$with_cc$with_sanitizer";
